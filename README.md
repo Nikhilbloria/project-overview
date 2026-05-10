@@ -136,51 +136,127 @@ docker push <dockerhub-username>/shellscape
 
 ---
 
-# Planned DevOps Integrations
+## 4. Kubernetes Deployment
 
-The following technologies will be integrated in the next phases of the project.
+The ShellScape application was deployed using Kubernetes for container orchestration and container management.
 
-## Jenkins CI/CD Pipeline
-
-- Automate build and deployment process
-- Trigger builds automatically on GitHub commits
-
-## Terraform
-
-- Provision AWS infrastructure using Infrastructure as Code (IaC)
-
-## Kubernetes
-
-- Deploy and manage Docker containers
+Kubernetes was used to:
+- Deploy Docker containers
+- Manage application pods
+- Expose application services
 - Enable scalability and orchestration
 
-## AWS EC2 & EBS
+---
 
-- Host application on cloud infrastructure
-- Attach persistent storage using EBS volumes
+### Kubernetes Deployment File
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: shellscape-deployment
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: shellscape
+
+  template:
+    metadata:
+      labels:
+        app: shellscape
+
+    spec:
+      containers:
+      - name: shellscape
+        image: <dockerhub-username>/shellscape
+
+        ports:
+        - containerPort: 80
+```
 
 ---
 
-# Project Objectives
+### Kubernetes Service File
 
-- Implement modern DevOps practices
-- Automate deployment workflow
-- Containerize web applications
-- Integrate CI/CD pipeline
-- Prepare scalable cloud deployment architecture
+```yaml
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: shellscape-service
+
+spec:
+  type: LoadBalancer
+
+  selector:
+    app: shellscape
+
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+```
 
 ---
 
-# Future Enhancements
+### Kubernetes Commands Used
 
-- Complete Jenkins pipeline automation
-- Kubernetes cluster deployment
-- HTTPS and domain integration
-- Monitoring and logging setup
-- Load balancing and scaling
+#### Deploy Application
+
+```bash
+kubectl apply -f deployment.yaml
+kubectl apply -f service.yaml
+```
+
+#### Check Running Pods
+
+```bash
+kubectl get pods
+```
+
+#### Check Services
+
+```bash
+kubectl get services
+```
+
+#### Port Forward Application
+
+```bash
+kubectl port-forward service/shellscape-service 3000:80
+```
+
+Application accessible at:
+
+```text
+http://localhost:3000
+```
 
 ---
 
-# Conclusion
+### Temporary Stop and Restart of Kubernetes Pods
 
-The ShellScape DevOps Deployment Project demonstrates the implementation of containerization, cloud deployment preparation, and DevOps workflow integration using industry-standard tools including Docker, GitHub, Jenkins, Terraform, Kubernetes, and AWS services.
+#### Stop Application Temporarily
+
+```bash
+kubectl scale deployment shellscape-deployment --replicas=0
+```
+
+#### Start Application Again
+
+```bash
+kubectl scale deployment shellscape-deployment --replicas=2
+```
+
+---
+
+### Result
+
+- Successfully deployed ShellScape application on Kubernetes
+- Multiple pods created for scalability
+- Application exposed through Kubernetes service
+- Kubernetes used for container orchestration and deployment management Project demonstrates the implementation of containerization, cloud deployment preparation, and DevOps workflow integration using industry-standard tools including Docker, GitHub, Jenkins, Terraform, Kubernetes, and AWS services.
