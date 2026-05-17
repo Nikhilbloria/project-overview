@@ -655,3 +655,296 @@ Jenkins automates deployment
 | Kubernetes | Orchestration |
 
 ---
+# ShellScape DevOps Monitoring Setup using Prometheus & Grafana
+
+---
+
+# Step 1: Started Kubernetes Cluster using Minikube
+
+Minikube was used to create a local Kubernetes cluster.
+
+## Commands Used
+
+```bash
+minikube start
+
+kubectl get nodes
+```
+
+## Result
+
+- Kubernetes cluster started successfully
+- Node status verified using `kubectl`
+
+---
+
+# Step 2: Installed Helm
+
+Helm was used as the Kubernetes package manager for installing Prometheus and Grafana easily.
+
+## Verify Helm
+
+```bash
+helm version
+```
+
+## Install Helm (Windows)
+
+```bash
+winget install Helm.Helm
+```
+
+## Result
+
+- Helm installed successfully
+- Helm repository support enabled
+
+---
+
+# Step 3: Added Prometheus Helm Repository
+
+The Prometheus Community Helm repository was added to download monitoring packages.
+
+## Commands Used
+
+```bash
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+
+helm repo update
+```
+
+## Result
+
+- Prometheus Helm charts downloaded successfully
+
+---
+
+# Step 4: Created Monitoring Namespace
+
+A separate namespace was created for monitoring components.
+
+## Command Used
+
+```bash
+kubectl create namespace monitoring
+```
+
+## Result
+
+- Monitoring resources isolated inside Kubernetes
+
+---
+
+# Step 5: Installed Prometheus and Grafana
+
+`kube-prometheus-stack` was installed using Helm.
+
+## Command Used
+
+```bash
+helm install monitoring prometheus-community/kube-prometheus-stack -n monitoring
+```
+
+## Components Installed
+
+- Prometheus
+- Grafana
+- Alertmanager
+- Node Exporter
+- Kubernetes Metrics Exporters
+
+## Result
+
+- Monitoring stack deployed successfully
+- Pods created automatically
+
+---
+
+# Step 6: Verified Monitoring Pods
+
+Kubernetes pods were checked to ensure successful deployment.
+
+## Command Used
+
+```bash
+kubectl get pods -n monitoring
+```
+
+## Example Output
+
+```bash
+monitoring-grafana                         Running
+monitoring-kube-prometheus-prometheus     Running
+monitoring-alertmanager                   Running
+```
+
+## Result
+
+- All monitoring pods running successfully
+
+---
+
+# Step 7: Opened Grafana Dashboard
+
+Grafana dashboard was exposed locally using port forwarding.
+
+## Command Used
+
+```bash
+kubectl port-forward -n monitoring svc/monitoring-grafana 3000:80
+```
+
+## Access URL
+
+```text
+http://localhost:3000
+```
+
+## Login Credentials
+
+```text
+Username: admin
+Password: prom-operator
+```
+
+## Result
+
+- Grafana dashboard opened successfully
+- Kubernetes dashboards available
+
+---
+
+# Step 8: Opened Prometheus Dashboard
+
+Prometheus UI was exposed locally.
+
+## Command Used
+
+```bash
+kubectl port-forward -n monitoring svc/monitoring-kube-prometheus-prometheus 9090:9090
+```
+
+## Access URL
+
+```text
+http://localhost:9090
+```
+
+## Result
+
+- Prometheus metrics dashboard accessible
+
+---
+
+# Step 9: Deployed ShellScape Application on Kubernetes
+
+ShellScape application was deployed using Kubernetes Deployment and Service YAML files.
+
+## Commands Used
+
+```bash
+kubectl apply -f deployment.yaml
+
+kubectl apply -f service.yaml
+```
+
+## Verify Deployment
+
+```bash
+kubectl get pods
+
+kubectl get svc
+```
+
+## Result
+
+- ShellScape pods deployed successfully
+- Application exposed using Kubernetes service
+
+---
+
+# Step 10: Monitored ShellScape using Grafana
+
+Grafana dashboards were used to monitor application performance.
+
+## Metrics Observed
+
+- CPU Usage
+- Memory Usage
+- Pod Health
+- Pod Restart Count
+- Network Usage
+- Cluster Health
+- Node Performance
+
+## Dashboards Used
+
+- Kubernetes / Compute Resources / Pod
+- Node Exporter Dashboard
+- Kubernetes Cluster Monitoring
+
+## Result
+
+- Real-time visualization of ShellScape infrastructure
+- Production-style monitoring implemented
+
+---
+
+# Step 11: Verified Metrics in Prometheus
+
+Prometheus queries were used to monitor Kubernetes metrics.
+
+## Example Queries
+
+### CPU Usage
+
+```promql
+rate(container_cpu_usage_seconds_total[1m])
+```
+
+### Memory Usage
+
+```promql
+container_memory_usage_bytes
+```
+
+### Pod Status
+
+```promql
+kube_pod_status_phase
+```
+
+### Network Usage
+
+```promql
+container_network_receive_bytes_total
+```
+
+## Result
+
+- Real-time metrics collected successfully
+- Kubernetes components monitored continuously
+
+---
+
+# Learning Outcomes
+
+- Learned Kubernetes monitoring architecture
+- Understood Prometheus metrics collection
+- Implemented Grafana dashboards
+- Monitored Kubernetes pods and nodes
+- Practiced production-level DevOps monitoring
+- Integrated monitoring into CI/CD workflow
+- Learned container orchestration monitoring
+
+---
+
+# Final Result
+
+- Successfully integrated Prometheus and Grafana with ShellScape
+- Implemented monitoring for Kubernetes infrastructure
+- Visualized real-time metrics using Grafana dashboards
+- Demonstrated DevOps, Cloud, Monitoring, and Kubernetes concepts together
+- Built a production-style monitoring pipeline for containerized applications
+
+---
