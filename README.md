@@ -948,3 +948,652 @@ container_network_receive_bytes_total
 - Built a production-style monitoring pipeline for containerized applications
 
 ---
+
+
+# 🚀 ShellScape Deployment on AWS EC2 using Terraform, Docker & Jenkins CI/CD
+---
+ShellScape was deployed on AWS EC2 using Docker containers and Jenkins CI/CD automation.  
+Terraform was used to automate infrastructure provisioning including EC2 instance creation, security group setup, and SSH key configuration.
+
+The deployment pipeline was integrated with GitHub so that whenever code is pushed to the repository, Jenkins automatically:
+
+- Pulls the latest code
+- Builds a new Docker image
+- Stops the old container
+- Removes the old container
+- Deploys the updated application automatically on AWS EC2
+
+---
+
+# 🏗️ Architecture Workflow
+
+```text
+Developer
+   ↓
+GitHub Repository
+   ↓
+GitHub Webhook
+   ↓
+Jenkins CI/CD Pipeline
+   ↓
+Docker Image Build
+   ↓
+Docker Container Deployment
+   ↓
+AWS EC2 Hosting
+```
+
+---
+
+# 📁 Step 1: Created Terraform Project Folder
+
+A dedicated Terraform project folder was created for infrastructure management.
+
+## Project Structure
+
+```text
+shellscape-aws-terraform
+│
+├── main.tf
+├── shellscape-key
+├── shellscape-key.pub
+```
+
+This folder was used to manage:
+
+- AWS infrastructure
+- EC2 deployment
+- Security configuration
+- Deployment automation
+
+---
+
+# 🔐 Step 2: Created SSH Key Pair
+
+An SSH key pair was generated for secure access to the EC2 instance.
+
+## Command Used
+
+```bash
+ssh-keygen -t rsa -b 4096 -f shellscape-key
+```
+
+## Files Generated
+
+```text
+shellscape-key
+shellscape-key.pub
+```
+
+## Purpose
+
+| File | Purpose |
+|---|---|
+| shellscape-key | Private key used for SSH login |
+| shellscape-key.pub | Public key uploaded to AWS |
+
+This enabled secure remote access to the EC2 server.
+
+---
+
+# ☁️ Step 3: Created AWS Infrastructure using Terraform
+
+Terraform was used as Infrastructure as Code (IaC) to automatically provision AWS resources.
+
+## Resources Created
+
+- AWS EC2 Instance
+- AWS Security Group
+- AWS Key Pair
+- Public IP Configuration
+
+## Terraform Features Used
+
+- AWS region selection
+- EC2 instance configuration
+- Security group rules
+- Docker/Jenkins installation using `user_data`
+
+## Terraform Commands
+
+```bash
+terraform init
+terraform plan
+terraform apply
+```
+
+Terraform automatically created the EC2 instance without manually using the AWS Console.
+
+---
+
+# 🔥 Step 4: Configured AWS Security Group
+
+A custom AWS security group was configured to allow required network traffic.
+
+## Opened Ports
+
+| Port | Purpose |
+|---|---|
+| 22 | SSH Remote Access |
+| 80 | ShellScape Website |
+| 8080 | Jenkins Dashboard |
+| 50000 | Jenkins Agent Communication |
+
+## Security Group Purpose
+
+- Allow website access
+- Allow Jenkins dashboard access
+- Enable secure SSH connection
+- Support Jenkins CI/CD communication
+
+---
+
+# 🖥️ Step 5: Connected to AWS EC2 Instance
+
+After the EC2 instance was created, the generated public IP was used for SSH connection.
+
+## SSH Command
+
+```bash
+ssh -i "shellscape-key" ec2-user@EC2_PUBLIC_IP
+```
+
+The instance was running Amazon Linux 2, so:
+
+```text
+ec2-user
+```
+
+was used as the default login user.
+
+---
+
+# 🐳 Step 6: Installed Docker on EC2
+
+Docker was installed to containerize Jenkins and ShellScape.
+
+## Commands Used
+
+```bash
+sudo yum update -y
+sudo amazon-linux-extras install docker -y
+sudo systemctl start docker
+sudo systemctl enable docker
+```
+
+## Verify Docker Installation
+
+```bash
+sudo docker --version
+```
+
+## Purpose of Docker
+
+- Containerization
+- Isolated environment
+- Simplified deployment
+- Portable application execution
+
+---
+
+# ⚙️ Step 7: Ran Jenkins Inside Docker Container
+
+Jenkins was deployed as a Docker container on EC2.
+
+## Jenkins Docker Command
+
+```bash
+sudo docker run -d \
+--name jenkins \
+-p 8080:8080 \
+-p 50000:50000 \
+-v jenkins_home:/var/jenkins_home \
+-v /var/run/docker.sock:/var/run/docker.sock \
+jenkins/jenkins:lts
+```
+
+## This Command Performed
+
+- Downloaded Jenkins image
+- Created Jenkins container
+- Mapped Jenkins ports
+- Persisted Jenkins data
+- Connected Docker socket for CI/CD automation
+
+## Jenkins Access URL
+
+```text
+http://EC2_PUBLIC_IP:8080
+```
+
+---
+
+# 🛠️ Step 8: Configured Jenkins
+
+Initial Jenkins setup was completed using the admin password.
+
+## Command Used
+
+```bash
+sudo docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
+```
+
+## Jenkins Setup Completed
+
+- Installed suggested plugins
+- Created admin user
+- Configured Jenkins dashboard
+
+## Required Plugins Installed
+
+- Git
+- GitHub
+- Pipeline
+- Docker Pipeline
+
+## Plugin Purpose
+
+| Plugin | Purpose |
+|---|---|
+| Git | Source code management |
+| GitHub | GitHub integration |
+| Pipeline | CI/CD workflow support |
+| Docker Pipeline | Docker automation |
+
+---
+
+# 🔓 Step 9: Enabled Docker Access for Jenkins
+
+Jenkins initially faced Docker permission issues.
+
+## Entered Jenkins Container
+
+```bash
+sudo docker exec -it -u root jenkins bash
+```
+
+## Commands Executed Inside Container
+
+```bash
+usermod -aG docker jenkins
+chmod 666 /var/run/docker.sock
+```
+
+## Restarted Jenkins
+
+```bash
+sudo docker restart jenkins
+```
+
+## Result
+
+Jenkins was now able to:
+
+- Build Docker images
+- Stop containers
+- Remove containers
+- Deploy updated containers automatically
+
+---
+
+# 🔄 Step 10: Created Jenkins CI/CD Pipeline
+
+A Jenkins pipeline named:
+
+```text
+ShellScape-CICD
+```
+
+was created.
+
+## Pipeline Configuration
+
+```text
+Pipeline script from SCM
+↓
+Git
+↓
+Repository URL
+↓
+Branch: main
+↓
+Script Path: Jenkinsfile
+```
+
+This allowed Jenkins to directly read the Jenkinsfile from GitHub.
+
+---
+
+# 📜 Step 11: Added Jenkinsfile
+
+A Jenkinsfile was added inside the ShellScape repository.
+## Jenkinsfile Used for CI/CD Pipeline
+
+A `Jenkinsfile` was created in the root directory of the ShellScape project repository.
+
+## Project Structure
+
+```text
+sheelscape
+│
+├── Jenkinsfile
+├── Dockerfile
+├── index.html
+├── styles.css
+├── js/
+└── assets/
+```
+
+## Jenkinsfile Code
+
+```groovy
+pipeline {
+    agent any
+
+    stages {
+
+        stage('Clone Code') {
+            steps {
+                echo 'Cloning latest code from GitHub...'
+                git branch: 'main', url: 'https://github.com/Nikhilbloria/sheelscape.git'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                echo 'Building Docker image...'
+                sh 'docker build -t shellscape:latest .'
+            }
+        }
+
+        stage('Stop Old Container') {
+            steps {
+                echo 'Stopping old container...'
+                sh 'docker stop shellscape-container || true'
+            }
+        }
+
+        stage('Remove Old Container') {
+            steps {
+                echo 'Removing old container...'
+                sh 'docker rm shellscape-container || true'
+            }
+        }
+
+        stage('Run New Container') {
+            steps {
+                echo 'Starting new container...'
+                sh 'docker run -d -p 80:80 --name shellscape-container shellscape:latest'
+            }
+        }
+    }
+}
+```
+
+## Pipeline Stages
+
+- Clone latest GitHub code
+- Build Docker image
+- Stop old container
+- Remove old container
+- Deploy updated container
+
+## Deployment Flow
+
+```text
+GitHub Code
+↓
+Docker Build
+↓
+Old Container Stop
+↓
+New Container Deployment
+```
+
+## Application Access
+
+```text
+http://EC2_PUBLIC_IP
+```
+
+---
+
+# 🔗 Step 12: Added GitHub Webhook
+
+GitHub webhook integration was configured for automatic CI/CD triggering.
+
+## Webhook URL
+
+```text
+http://EC2_PUBLIC_IP:8080/github-webhook/
+```
+
+## Event Selected
+
+```text
+Just the push event
+```
+
+## Webhook Workflow
+
+```text
+GitHub Push
+↓
+Webhook Trigger
+↓
+Jenkins Pipeline Execution
+```
+
+This removed the need to manually click **Build Now**.
+
+---
+
+# 🚀 Step 13: Enabled Jenkins GitHub Trigger
+
+Inside Jenkins pipeline configuration:
+
+```text
+Build Triggers
+↓
+GitHub hook trigger for GITScm polling
+```
+
+was enabled.
+
+This allowed Jenkins to automatically start deployments whenever GitHub receives new commits.
+
+---
+
+# 🔄 Final Automated CI/CD Workflow
+
+```text
+Developer Code Changes
+↓
+Git Push to GitHub
+↓
+GitHub Webhook Trigger
+↓
+Jenkins Pulls Latest Code
+↓
+Docker Image Rebuilt
+↓
+Old Container Removed
+↓
+New Container Started
+↓
+Updated ShellScape Live on AWS EC2
+```
+
+---
+
+# ✅ Final Result
+
+ShellScape was successfully deployed on AWS EC2 using:
+
+- Terraform
+- AWS EC2
+- Docker
+- Jenkins
+- GitHub
+- CI/CD Automation
+
+The deployment process became fully automated and production-style.
+
+---
+
+# 🌐 Elastic IP Configuration & Auto-Restart Setup
+
+After deploying ShellScape on AWS EC2 using Docker and Jenkins CI/CD, an Elastic IP was configured to create a permanent public IP address for the server.
+
+## Why Elastic IP Was Used
+
+Normally, when an AWS EC2 instance is stopped and started again, AWS changes the public IP address automatically.
+
+This creates problems such as:
+
+- Jenkins URL changes
+- Website URL changes
+- GitHub webhook stops working
+- Manual IP updates are required
+
+To solve this issue, an Elastic IP was assigned to the EC2 instance.
+
+---
+
+# ☁️ Elastic IP Configuration
+
+An Elastic IP was allocated from the AWS EC2 dashboard and associated with the ShellScape EC2 instance.
+
+## Steps Performed
+
+```text
+AWS Console
+↓
+EC2
+↓
+Elastic IPs
+↓
+Allocate Elastic IP Address
+↓
+Associate Elastic IP with EC2 Instance
+```
+
+## Assigned Elastic IP
+
+```text
+54.204.135.197
+```
+
+---
+
+# 🌐 Permanent URLs Created
+
+## ShellScape Website
+
+```text
+http://54.204.135.197
+```
+
+## Jenkins Dashboard
+
+```text
+http://54.204.135.197:8080
+```
+
+These URLs now remain permanent even after restarting the EC2 instance.
+
+---
+
+# 🔄 Updated GitHub Webhook
+
+The GitHub webhook was updated using the Elastic IP address.
+
+## Webhook URL
+
+```text
+http://54.204.135.197:8080/github-webhook/
+```
+
+This ensured Jenkins CI/CD automation continued working after EC2 restarts.
+
+---
+
+# 🐳 Enabled Automatic Docker Container Restart
+
+Docker restart policies were configured so containers automatically start whenever EC2 starts again.
+
+## Restart Policy Used
+
+```text
+unless-stopped
+```
+
+## Jenkins Container Status
+
+```bash
+sudo docker inspect -f '{{ .HostConfig.RestartPolicy.Name }}' jenkins
+```
+
+Output:
+
+```text
+unless-stopped
+```
+
+## ShellScape Container Restart Policy
+
+```bash
+sudo docker update --restart unless-stopped shellscape-container
+```
+
+---
+
+# 🚀 Final Automated Startup Workflow
+
+Now whenever the EC2 instance is started:
+
+```text
+EC2 Starts
+↓
+Docker Service Starts
+↓
+Jenkins Container Starts Automatically
+↓
+ShellScape Container Starts Automatically
+↓
+Website Becomes Live
+```
+
+No manual Docker commands are required anymore.
+
+---
+
+# ✅ Final Result
+
+Successfully configured:
+
+- AWS Elastic IP
+- Permanent Public IP
+- Stable Jenkins URL
+- Stable Website URL
+- Persistent GitHub Webhook
+- Automatic Docker Container Restart
+- Production-style AWS deployment workflow
+  
+
+# 📚 Learning Outcomes
+
+Through this project, I learned:
+
+- Infrastructure as Code using Terraform
+- AWS EC2 cloud deployment
+- Docker containerization
+- Jenkins CI/CD automation
+- GitHub webhook integration
+- Automated Docker deployment
+- Security group configuration
+- SSH key-based authentication
+- Real-world DevOps deployment workflow
+- Automated application update process
+
+---
